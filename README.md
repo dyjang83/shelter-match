@@ -1,5 +1,7 @@
 # 🐾 Animal Shelter Match
 
+**🔗 Live demo:** https://diane-shelter-match.streamlit.app
+
 An ML extension of a CS XL 32 C++ midterm project. The original assignment
 asked for an animal shelter manager built around polymorphism, smart
 pointers, and a recursive adoption-history chain. This version ports the
