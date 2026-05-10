@@ -137,7 +137,7 @@ def make_mlp() -> Pipeline:
     return Pipeline([
         ("preprocess", build_preprocessor()),
         ("classifier", MLPClassifier(
-            hidden_layer_sizes=(32, 16), max_iter=500, random_state=42
+            hidden_layer_sizes=(32, 16), max_iter=2000, random_state=42
         )),
     ])
 

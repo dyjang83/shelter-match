@@ -8,7 +8,7 @@ animals by how well they fit each adopter's lifestyle, served through a
 Streamlit web UI — with a full evaluation pipeline including
 cross-validation, calibration analysis, and a fairness audit.
 
-**🔗 Live demo:** https://your-streamlit-url.streamlit.app  *(replace with your URL)*  
+**🔗 Live demo:** https://diane-shelter-match.streamlit.app 
 **📓 Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
 
 ## What's interesting here
