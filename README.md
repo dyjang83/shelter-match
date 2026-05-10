@@ -9,6 +9,7 @@ Streamlit web UI — with a full evaluation pipeline including
 cross-validation, calibration analysis, and a fairness audit.
 
 **🔗 Live demo:** https://diane-animal-shelter-match.streamlit.app 
+
 **📓 Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
 
 ## What's interesting here
