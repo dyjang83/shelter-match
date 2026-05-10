@@ -1,28 +1,37 @@
 # 🐾 Animal Shelter Match
 
-**🔗 Live demo:** https://diane-shelter-match.streamlit.app
-
 An ML extension of a CS XL 32 C++ midterm project. The original assignment
 asked for an animal shelter manager built around polymorphism, smart
 pointers, and a recursive adoption-history chain. This version ports the
 core OOP design to Python and adds a gradient boosting model that ranks
 animals by how well they fit each adopter's lifestyle, served through a
-Streamlit web UI.
+Streamlit web UI — with a full evaluation pipeline including
+cross-validation, calibration analysis, and a fairness audit.
+
+**🔗 Live demo:** https://your-streamlit-url.streamlit.app  *(replace with your URL)*  
+**📓 Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
 
 ## What's interesting here
 
 - **Polymorphism doing real work.** In the original midterm, polymorphism
   only differentiated `printInfo()` output. Here, every `Animal` subclass
-  contributes a feature vector that the matching model consumes — so the
+  contributes a feature vector that the matching model consumes — the
   abstract base class earns its keep beyond text formatting.
 - **Hidden ground-truth function the model has to recover.** Training
   data is generated from a hand-designed compatibility function (energy
   matching, allergy hard-stops, apartment + large dog penalties, etc.).
   The model never sees these rules. Feature importances in the trained
-  model recover them, which is shown in the "About the Model" page.
-- **Linear vs. non-linear comparison.** Logistic regression hits 66%
-  accuracy / 0.72 AUC; gradient boosting hits 82% / 0.82 by capturing
-  interactions like *apartment AND large dog*.
+  model recover them, which is shown in the analysis notebook.
+- **Four-model baseline comparison with cross-validation.** Logistic
+  regression, gradient boosting, XGBoost, and an MLP, all evaluated with
+  5-fold stratified CV and reported with means + standard deviations.
+- **Calibration analysis.** Reliability diagrams check whether predicted
+  probabilities are meaningful (a "70% match" should mean 70% of those
+  pairs are actually good matches), not just well-ranked.
+- **Fairness audit.** Tests whether the model systematically
+  disadvantages certain animal groups (rabbits, large dogs, low-trained
+  animals) across a neutral pool of adopters, with disparity ratios for
+  each protected group.
 - **Per-match explanations via local perturbation.** For each ranked
   animal, we flip one feature at a time and measure the change in
   predicted probability — a lightweight SHAP-style attribution with
@@ -32,20 +41,49 @@ Streamlit web UI.
   reference to the previous record, and `print_history()` walks it
   recursively. The web UI renders the chain as a visual timeline.
 
+## Headline results
+
+5-fold cross-validation on 2,000 synthetic samples:
+
+| Model               | Accuracy        | ROC-AUC         | F1              |
+|---------------------|----------------:|----------------:|----------------:|
+| Logistic Regression | 0.652 ± 0.015   | 0.693 ± 0.013   | 0.519 ± 0.018   |
+| Gradient Boosting   | **0.816 ± 0.021** | **0.802 ± 0.017** | 0.596 ± 0.056 |
+| XGBoost             | 0.817 ± 0.025   | 0.802 ± 0.012   | **0.621 ± 0.062** |
+| MLP (32, 16)        | 0.757 ± 0.018   | 0.744 ± 0.020   | 0.556 ± 0.042   |
+
+Gradient boosting is shipped in production. XGBoost is essentially tied
+on accuracy but adds a heavy dependency for ~no real gain. The MLP
+underperforms tree methods on this tabular dataset with only 2K samples
+— a useful confirmation of the prior that gradient-boosted trees still
+dominate small-tabular problems.
+
+**Fairness findings:** rabbits face the largest disparity (4% strong-match
+rate vs. ~9% for dogs/cats; disparity ratio 0.42), driven partly by genuine
+ground-truth constraints and partly by underrepresentation in training
+data. The notebook discusses what a production shelter would do about this.
+
 ## Project layout
 
 ```
 shelter_ml/
-├── shelter.py        # Animal/Dog/Cat/Rabbit/Adopter/Shelter classes (Python port of the C++ design)
-├── data_gen.py       # Synthetic data generator with hidden ground-truth function
-├── train_model.py    # Trains logistic + gradient boosting; saves model + importances
-├── matcher.py        # Inference + per-match explanation via perturbation
-├── app.py            # Streamlit web UI
+├── shelter.py          # Animal/Dog/Cat/Rabbit/Adopter/Shelter (Python port of the C++ design)
+├── data_gen.py         # Synthetic data generator + hidden ground-truth function
+├── train_model.py      # Trains gradient boosting, saves model + feature importances
+├── evaluation.py       # Cross-validation, calibration, per-species, failure modes
+├── fairness.py         # Group disparity analysis with disparity-ratio metric
+├── matcher.py          # Inference + per-match explanation via perturbation
+├── app.py              # Streamlit web UI
+├── notebooks/
+│   └── analysis.ipynb  # Full analytical write-up with plots
 ├── data/
 │   └── synthetic_matches.csv
-└── models/
-    ├── match_model.joblib
-    └── feature_importances.csv
+├── models/
+│   ├── match_model.joblib
+│   └── feature_importances.csv
+└── reports/
+    ├── baseline_comparison.csv
+    └── fairness_audit.csv
 ```
 
 ## Setup
@@ -53,15 +91,18 @@ shelter_ml/
 ```bash
 pip install -r requirements.txt
 
-# Generate training data and train the model (one-time).
+# One-time: generate data, train model, run evaluation.
 python data_gen.py
 python train_model.py
+python evaluation.py
+python fairness.py
 
 # Launch the web app.
 streamlit run app.py
-```
 
-Then open `http://localhost:8501`.
+# Or open the analysis notebook.
+jupyter notebook notebooks/analysis.ipynb
+```
 
 ## Architecture notes
 
@@ -79,20 +120,10 @@ chain accumulates on the same Python object across multiple adoptions
 of the same animal, matching the readmission behavior in the C++ sample
 output.
 
-## Model performance
+## What I'd do next
 
-| Model | Accuracy | ROC-AUC |
-|-------|---------:|--------:|
-| Logistic regression (baseline) | 0.66 | 0.72 |
-| Gradient boosting (selected)   | **0.82** | **0.82** |
-
-Top features the gradient boosting model relied on:
-1. `energy_level` (animal)
-2. `activity_level` (adopter)
-3. `needs_quiet` (animal)
-4. `hours_home_per_day` (adopter)
-5. `prefers_quiet_home` (adopter)
-6. `lives_in_apartment` (adopter)
-
-These line up with the rules encoded in the hidden compatibility function,
-which is the headline result.
+- Replace static label noise with realistic adoption-outcome data once available.
+- Add Platt scaling or isotonic regression for calibration (`CalibratedClassifierCV`).
+- Re-weight training data to upweight underrepresented species (rabbits).
+- Add a "second-look" pass that surfaces the highest-scoring strong matches *per animal*, not just per adopter — so every animal gets visibility.
+- Replace local perturbation explanations with proper SHAP values.
