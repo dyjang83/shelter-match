@@ -120,11 +120,3 @@ reruns. Adoptions mutate the shelter in place; the recursive history
 chain accumulates on the same Python object across multiple adoptions
 of the same animal, matching the readmission behavior in the C++ sample
 output.
-
-## What I'd do next
-
-- Replace static label noise with realistic adoption-outcome data once available.
-- Add Platt scaling or isotonic regression for calibration (`CalibratedClassifierCV`).
-- Re-weight training data to upweight underrepresented species (rabbits).
-- Add a "second-look" pass that surfaces the highest-scoring strong matches *per animal*, not just per adopter — so every animal gets visibility.
-- Replace local perturbation explanations with proper SHAP values.
