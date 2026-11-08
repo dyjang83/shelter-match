@@ -1,4 +1,4 @@
-# 🐾 Animal Shelter Match
+# Animal Shelter Match
 
 An ML extension of a CS XL 32 C++ midterm project. The original assignment
 asked for an animal shelter manager built around polymorphism, smart
@@ -8,13 +8,13 @@ animals by how well they fit each adopter's lifestyle, served through a
 Streamlit web UI — with a full evaluation pipeline including
 cross-validation, calibration analysis, and a fairness audit.
 
-**🔗 Live demo:** https://diane-animal-shelter-match.streamlit.app 
+**Live demo:** https://diane-animal-shelter-match.streamlit.app 
 
-**📓 Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
+**Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
 
-## What's interesting here
+## Key Components
 
-- **Polymorphism doing real work.** In the original midterm, polymorphism
+- **Polymorphism.** In the original midterm, polymorphism
   only differentiated `printInfo()` output. Here, every `Animal` subclass
   contributes a feature vector that the matching model consumes — the
   abstract base class earns its keep beyond text formatting.
@@ -35,8 +35,7 @@ cross-validation, calibration analysis, and a fairness audit.
   each protected group.
 - **Per-match explanations via local perturbation.** For each ranked
   animal, we flip one feature at a time and measure the change in
-  predicted probability — a lightweight SHAP-style attribution with
-  zero extra dependencies.
+  predicted probability.
 - **Recursive adoption history preserved.** The C++ `unique_ptr`
   history chain ports cleanly to Python: each `AdoptionRecord` holds a
   reference to the previous record, and `print_history()` walks it
@@ -49,8 +48,8 @@ cross-validation, calibration analysis, and a fairness audit.
 | Model               | Accuracy        | ROC-AUC         | F1              |
 |---------------------|----------------:|----------------:|----------------:|
 | Logistic Regression | 0.652 ± 0.015   | 0.693 ± 0.013   | 0.519 ± 0.018   |
-| Gradient Boosting   | **0.816 ± 0.021** | **0.802 ± 0.017** | 0.596 ± 0.056 |
-| XGBoost             | 0.817 ± 0.025   | 0.802 ± 0.012   | **0.621 ± 0.062** |
+| Gradient Boosting   | 0.816 ± 0.021   | 0.802 ± 0.017   | 0.596 ± 0.056   |
+| XGBoost             | 0.817 ± 0.025   | 0.802 ± 0.012   | 0.621 ± 0.062   |
 | MLP (32, 16)        | 0.757 ± 0.018   | 0.744 ± 0.020   | 0.556 ± 0.042   |
 
 Gradient boosting is shipped in production. XGBoost is essentially tied
