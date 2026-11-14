@@ -8,8 +8,6 @@ animals by how well they fit each adopter's lifestyle, served through a
 Streamlit web UI — with a full evaluation pipeline including
 cross-validation, calibration analysis, and a fairness audit.
 
-**Live demo:** https://diane-animal-shelter-match.streamlit.app 
-
 **Analysis notebook:** [`notebooks/analysis.ipynb`](notebooks/analysis.ipynb)
 
 ## Key Components
@@ -21,7 +19,7 @@ cross-validation, calibration analysis, and a fairness audit.
 - **Hidden ground-truth function the model has to recover.** Training
   data is generated from a hand-designed compatibility function (energy
   matching, allergy hard-stops, apartment + large dog penalties, etc.).
-  The model never sees these rules. Feature importances in the trained
+  The model does not see these rules. Feature importances in the trained
   model recover them, which is shown in the analysis notebook.
 - **Four-model baseline comparison with cross-validation.** Logistic
   regression, gradient boosting, XGBoost, and an MLP, all evaluated with
@@ -34,7 +32,7 @@ cross-validation, calibration analysis, and a fairness audit.
   animals) across a neutral pool of adopters, with disparity ratios for
   each protected group.
 - **Per-match explanations via local perturbation.** For each ranked
-  animal, we flip one feature at a time and measure the change in
+  animal, I flip one feature at a time and measure the change in
   predicted probability.
 - **Recursive adoption history preserved.** The C++ `unique_ptr`
   history chain ports cleanly to Python: each `AdoptionRecord` holds a
